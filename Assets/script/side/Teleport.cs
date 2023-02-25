@@ -1,47 +1,37 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Commode : MonoBehaviour
+public class Teleport : MonoBehaviour
 {
-    public List<InventoryItemData> itemsToAdd;
-    private bool hasBeenUsed = false; // flag to indicate if the itemsToAdd list has been used
-    private Collider other;
+    public Transform destination;
     public GameObject textInfo;
+    private Collider other;
+
     private void Update()
     {
         if (other)
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
+                Debug.Log("press E");
                 if (other.CompareTag("Player"))
                 {
-
-                    if (!hasBeenUsed)
-                    {
-
-                        InventorySystem inventorySystem = GameObject.Find("Inventory").GetComponent<InventorySystem>();
-                        if (inventorySystem != null)
-                        {
-                            foreach (InventoryItemData item in itemsToAdd)
-                            {
-                                inventorySystem.Add(item);
-                                Debug.Log(item.dispalyName + " Add to Inventory");
-                            }
-                            itemsToAdd.Clear(); // remove the itemsToAdd list to prevent adding the items again
-                            hasBeenUsed = true; // set the flag to indicate that the itemsToAdd list has been used
-
-                        }
-                    }
+                    moveto(other);
+                    this.other = null;
                 }
             }
         }
     }
-    
+
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             textInfo.SetActive(true);
+
+            
             Vector3 direction = Camera.main.transform.position - textInfo.transform.position;
 
             // Calculate the rotation that points in the opposite direction
@@ -52,6 +42,7 @@ public class Commode : MonoBehaviour
             this.other = other;
         }
     }
+
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -61,4 +52,13 @@ public class Commode : MonoBehaviour
         }
     }
 
+
+    void moveto(Collider other)
+    {
+        CharacterController controller = other.GetComponent<CharacterController>();
+        controller.enabled = false;
+        other.transform.position = destination.position;
+        controller.enabled = true;
+        textInfo.SetActive(false);
+    }
 }

@@ -17,6 +17,7 @@ public class Door : MonoBehaviour
     private float smoothVelocity; // The velocity of door movement
     private bool isPlayingAudio = false; // Whether the audio source is currently playing
     private AudioSource audioSource; // The AudioSource component to play door sounds
+    public Transform door_base;
 
     void Start()
     {
@@ -27,11 +28,14 @@ public class Door : MonoBehaviour
     {
         if (!locked && !isOpen && !isPlayingAudio)
         {
-            // Open the door when any game object enters the trigger zone
-            targetAngle = openAngle;
-            isOpen = true;
-            isPlayingAudio = true;
-            audioSource.PlayOneShot(openSound);
+            if (other.CompareTag("Player") || other.CompareTag("Enemy"))
+            {
+                // Open the door when any game object enters the trigger zone
+                targetAngle = openAngle;
+                isOpen = true;
+                isPlayingAudio = true;
+                audioSource.PlayOneShot(openSound);
+            }
         }
     }
 
@@ -39,11 +43,13 @@ public class Door : MonoBehaviour
     {
         if (!locked && isOpen && !isPlayingAudio)
         {
-            // Close the door when any game object exits the trigger zone
-            targetAngle = closeAngle;
-            isOpen = false;
-            isPlayingAudio = true;
-            audioSource.PlayOneShot(closeSound);
+            if (other.CompareTag("Player") || other.CompareTag("Enemy"))
+            {
+                targetAngle = closeAngle;
+                isOpen = false;
+                isPlayingAudio = true;
+                audioSource.PlayOneShot(closeSound);
+            }
         }
     }
 
@@ -65,9 +71,9 @@ public class Door : MonoBehaviour
 
         // Smoothly rotate the door towards the target angle
         float currentAngle =
-            Mathf.SmoothDampAngle(transform.localEulerAngles.y, targetAngle, ref smoothVelocity, smoothTime);
-        transform.localEulerAngles =
-            new Vector3(transform.localEulerAngles.x, currentAngle, transform.localEulerAngles.z);
+            Mathf.SmoothDampAngle(door_base.transform.localEulerAngles.y, targetAngle, ref smoothVelocity, smoothTime);
+        door_base.transform.localEulerAngles =
+            new Vector3(door_base.transform.localEulerAngles.x, currentAngle, door_base.transform.localEulerAngles.z);
 
         // Set isPlayingAudio back to false when the audio clip finishes playing
         if (isPlayingAudio && !audioSource.isPlaying)

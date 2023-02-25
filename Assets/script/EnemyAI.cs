@@ -139,7 +139,7 @@ public class EnemyAI : MonoBehaviour
             {
                 if (hit.collider.tag == "Player")
                 {
-                    hit.collider.gameObject.GetComponent<MainPlayer>().freeze = true;
+                    hit.collider.gameObject.GetComponent<PlayerController>().freeze = true;
                     return true;
                 }
             }
