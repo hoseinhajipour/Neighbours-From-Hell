@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
 
     public bool freeze = false;
 
+    public Animator animator;
     private void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -22,12 +23,37 @@ public class PlayerController : MonoBehaviour
         if (freeze == false)
         {
             float moveInput = Input.GetAxis("Horizontal");
+            if (moveInput != 0)
+            {
+                animator.SetBool("isWalking", true);
 
-            moveDirection = new Vector3(moveInput, 0f, 0f);
-            moveDirection *= speed;
+                if (moveInput < 0)
+                {
+                    transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+                }
+                else if (moveInput > 0)
+                {
+                    transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+                }
+
+                moveDirection = new Vector3(moveInput, 0f, 0f);
+                moveDirection *= speed;
+            }
+            else
+            {
+                animator.SetBool("isWalking", false);
+                moveDirection = Vector3.zero;
+            }
 
             moveDirection.y -= gravity;
             controller.Move(moveDirection * Time.deltaTime);
         }
+    }
+
+    public void freezePlayer()
+    {
+        animator.SetBool("isWalking", false);
+        freeze = true;
+        
     }
 }

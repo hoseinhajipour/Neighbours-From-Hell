@@ -27,6 +27,7 @@ public class EnemyAI : MonoBehaviour
     public float Runspeed = 5.0f;
 
     public GameObject loseMenu;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -65,9 +66,10 @@ public class EnemyAI : MonoBehaviour
         {
             animator.SetBool("isWalking", true);
         }
-
     }
+
     private bool isPlayingIdleAnimation = false;
+
     IEnumerator PlayIdleAnimation()
     {
         // Set the flag to true to indicate that the animation is playing
@@ -81,12 +83,12 @@ public class EnemyAI : MonoBehaviour
         {
             currentWaypointIndex = 0;
         }
+
         yield return new WaitForSeconds(waitTime);
         animator.SetBool("isWalking", true);
         agent.isStopped = false;
         // Reset the flag to false to indicate that the animation is completed
         isPlayingIdleAnimation = false;
-
     }
 
     void AttackPlayer()
@@ -139,7 +141,8 @@ public class EnemyAI : MonoBehaviour
             {
                 if (hit.collider.tag == "Player")
                 {
-                    hit.collider.gameObject.GetComponent<PlayerController>().freeze = true;
+                    Debug.Log("Find Player");
+                    hit.collider.gameObject.GetComponent<PlayerController>().freezePlayer();
                     return true;
                 }
             }
