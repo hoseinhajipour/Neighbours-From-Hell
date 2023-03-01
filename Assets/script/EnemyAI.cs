@@ -18,7 +18,7 @@ public class EnemyAI : MonoBehaviour
 
     private NavMeshAgent agent;
     private Transform player;
-    private Animator animator;
+    public Animator animator;
 
     private float attackTimer;
     public float totalFOV = 90.0f;
@@ -32,7 +32,7 @@ public class EnemyAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        animator = GetComponent<Animator>();
+       // animator = GetComponent<Animator>();
         patrolWaypoints = Tasks.GetComponentsInChildren<Waypoint>();
     }
 
@@ -85,6 +85,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         yield return new WaitForSeconds(waitTime);
+        animator.Play("idle");
         animator.SetBool("isWalking", true);
         agent.isStopped = false;
         // Reset the flag to false to indicate that the animation is completed

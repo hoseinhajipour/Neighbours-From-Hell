@@ -30,8 +30,22 @@ public class Door : MonoBehaviour
         {
             if (other.CompareTag("Player") || other.CompareTag("Enemy"))
             {
-                // Open the door when any game object enters the trigger zone
-                targetAngle = openAngle;
+                // Calculate the direction from the door to the other object
+                Vector3 direction = other.transform.position - transform.position;
+
+                // Calculate the angle between the direction and the door's forward direction
+                float angle = Vector3.Angle(direction, transform.forward);
+
+                // Determine the target angle based on the angle between the direction and the door's forward direction
+                if (angle > 90.0f)
+                {
+                    targetAngle = openAngle;
+                }
+                else
+                {
+                    targetAngle = -openAngle;
+                }
+
                 isOpen = true;
                 isPlayingAudio = true;
                 audioSource.PlayOneShot(openSound);
