@@ -46,7 +46,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5317322909577747890}
-  - component: {fileID: 5317322909577747891}
+  - component: {fileID: 6470160498887139537}
   - component: {fileID: 5317322909577747888}
   - component: {fileID: 5317322909577747893}
   m_Layer: 0
@@ -72,10 +72,10 @@ Transform:
   - {fileID: 5317322910237568117}
   - {fileID: 5317322911039828866}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &5317322909577747891
-SphereCollider:
+--- !u!65 &6470160498887139537
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -85,8 +85,8 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 3.89
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 16.266111, y: 3.2194195, z: 7.172207}
+  m_Center: {x: 6.725074, y: 1.1097097, z: -0.73993874}
 --- !u!114 &5317322909577747888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104,6 +104,7 @@ MonoBehaviour:
   targetObject: {fileID: 5317322911039828894}
   sabotageSlider: {fileID: 5317322911132444558}
   Broke: 0
+  actionDistance: 1.5
 --- !u!54 &5317322909577747893
 Rigidbody:
   m_ObjectHideFlags: 0

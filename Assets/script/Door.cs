@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class Door : MonoBehaviour
 {
@@ -18,6 +20,9 @@ public class Door : MonoBehaviour
     private bool isPlayingAudio = false; // Whether the audio source is currently playing
     private AudioSource audioSource; // The AudioSource component to play door sounds
     public Transform door_base;
+
+    private float openTimer = 0.0f; // The amount of time the door has been open
+
 
     void Start()
     {
@@ -49,7 +54,22 @@ public class Door : MonoBehaviour
                 isOpen = true;
                 isPlayingAudio = true;
                 audioSource.PlayOneShot(openSound);
+                
+                // Start the coroutine to close the door after 3 seconds
+                StartCoroutine(CloseDoorAfterDelay(3.0f));
             }
+        }
+    }
+
+    IEnumerator CloseDoorAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (isOpen)
+        {
+            targetAngle = closeAngle;
+            isOpen = false;
+            isPlayingAudio = true;
+            audioSource.PlayOneShot(closeSound);
         }
     }
 
@@ -94,5 +114,6 @@ public class Door : MonoBehaviour
         {
             isPlayingAudio = false;
         }
+        
     }
 }

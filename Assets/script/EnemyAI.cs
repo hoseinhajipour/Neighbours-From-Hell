@@ -28,11 +28,16 @@ public class EnemyAI : MonoBehaviour
 
     public GameObject loseMenu;
 
+    public int angry = 0;
+    private bool FindSabotage = false;
+    private GameObject SabotageObject;
+    private bool isPlayingAngryAnimation = false;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
-       // animator = GetComponent<Animator>();
+        // animator = GetComponent<Animator>();
         patrolWaypoints = Tasks.GetComponentsInChildren<Waypoint>();
     }
 
@@ -51,22 +56,27 @@ public class EnemyAI : MonoBehaviour
 
     void Patrol()
     {
-        Waypoint currentWaypoint = patrolWaypoints[currentWaypointIndex];
-        agent.SetDestination(currentWaypoint.transform.position);
-
-        if (agent.remainingDistance <= stoppingDistance)
+        checkSabotages();
+        if (FindSabotage == false)
         {
-            animator.SetBool("isWalking", false);
-            if (!isPlayingIdleAnimation)
+            Waypoint currentWaypoint = patrolWaypoints[currentWaypointIndex];
+            agent.SetDestination(currentWaypoint.transform.position);
+
+            if (agent.remainingDistance <= 1.0f)
             {
-                StartCoroutine(PlayIdleAnimation());
+                animator.SetBool("isWalking", false);
+                if (!isPlayingIdleAnimation)
+                {
+                    StartCoroutine(PlayIdleAnimation());
+                }
+            }
+            else
+            {
+                animator.SetBool("isWalking", true);
             }
         }
-        else
-        {
-            animator.SetBool("isWalking", true);
-        }
     }
+
 
     private bool isPlayingIdleAnimation = false;
 
@@ -152,6 +162,69 @@ public class EnemyAI : MonoBehaviour
         return false;
     }
 
+    public void checkSabotages()
+    {
+        if (FindSabotage)
+        {
+            agent.SetDestination(SabotageObject.transform.position);
+            if (agent.remainingDistance <= stoppingDistance)
+            {
+                animator.SetBool("isWalking", false);
+                if (!isPlayingAngryAnimation)
+                {
+                    Debug.Log("what happend ?!");
+                    isPlayingAngryAnimation = true;
+                    StartCoroutine(PlayAnfryAnimation());
+                }
+            }
+            else
+            {
+                animator.SetBool("isWalking", true);
+            }
+        }
+        else
+        {
+            Vector3 direction = player.position - transform.position;
+            float angle = Vector3.Angle(direction, transform.forward);
+       //     if (angle < totalFOV) {
+                RaycastHit hito;
+                if (Physics.Raycast(transform.position, direction, out hito, lookRadius))
+                {
+                    //  Debug.Log( hit.collider.gameObject.name);
+                    if (hito.collider.tag == "Sabotage")
+                    {
+                        Sabotage sabotage = hito.collider.GetComponent<Sabotage>();
+                        if (sabotage.Broke == true)
+                        {
+                            Debug.Log("FindSabotage");
+                            FindSabotage = true;
+                            SabotageObject = hito.collider.gameObject;
+                        }
+                    }
+                }
+          //  }
+        }
+    }
+
+    IEnumerator PlayAnfryAnimation()
+    {
+        agent.isStopped = true;
+        animator.Play("angry");
+        yield return new WaitForSeconds(3.0f);
+        animator.SetBool("isFix",true);
+        yield return new WaitForSeconds(5.0f);
+        animator.SetBool("isFix",false);
+        animator.SetBool("isWalking", true);
+        agent.isStopped = false;
+
+        SabotageObject.GetComponent<Sabotage>().fix();
+        FindSabotage = false;
+        SabotageObject = null;
+        angry += 10;
+        yield return new WaitForSeconds(1.0f);
+        // Reset the flag to false to indicate that the animation is completed
+        isPlayingAngryAnimation = false;
+    }
 
     private void OnDrawGizmos()
     {
