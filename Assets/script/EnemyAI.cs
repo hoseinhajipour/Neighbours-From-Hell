@@ -34,12 +34,15 @@ public class EnemyAI : MonoBehaviour
     private GameObject SabotageObject;
     private bool isPlayingAngryAnimation = false;
 
+    private LevelController LevelController_;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
         // animator = GetComponent<Animator>();
         patrolWaypoints = Tasks.GetComponentsInChildren<Waypoint>();
+        LevelController_ = GameObject.Find("LevelController").GetComponent<LevelController>();
     }
 
     void Update()
@@ -53,7 +56,7 @@ public class EnemyAI : MonoBehaviour
         {
             Patrol();
         }
-        
+
         // Check if the target angry value has changed
         if (currentAngryValue != targetAngryValue)
         {
@@ -188,7 +191,7 @@ public class EnemyAI : MonoBehaviour
                 {
                     Debug.Log("what happend ?!");
                     isPlayingAngryAnimation = true;
-                    StartCoroutine(PlayAnfryAnimation());
+                    StartCoroutine(PlayAngryAnimation());
                 }
             }
             else
@@ -219,10 +222,12 @@ public class EnemyAI : MonoBehaviour
             //  }
         }
     }
+
     public Slider angrySlider;
     public int currentAngryValue = 0;
     public int targetAngryValue = 0;
     private float animationDuration = 2.0f;
+
     IEnumerator UpdateAngryValue()
     {
         float timeElapsed = 0;
@@ -247,6 +252,7 @@ public class EnemyAI : MonoBehaviour
         // Set the current angry value to the target value
         currentAngryValue = targetAngryValue;
     }
+
     public void IncreaseAngryValue(int amount)
     {
         targetAngryValue += amount;
@@ -256,23 +262,24 @@ public class EnemyAI : MonoBehaviour
     {
         targetAngryValue -= amount;
     }
-    IEnumerator PlayAnfryAnimation()
+
+    IEnumerator PlayAngryAnimation()
     {
         agent.isStopped = true;
         animator.Play("angry");
         angry += 10;
         IncreaseAngryValue(SabotageObject.GetComponent<Sabotage>().angryAmount);
         yield return new WaitForSeconds(3.0f);
+
         animator.SetBool("isFix", true);
         yield return new WaitForSeconds(5.0f);
         animator.SetBool("isFix", false);
         animator.SetBool("isWalking", true);
         agent.isStopped = false;
-
         SabotageObject.GetComponent<Sabotage>().fix();
         FindSabotage = false;
         SabotageObject = null;
-      
+        LevelController_.Increse();
         yield return new WaitForSeconds(1.0f);
         // Reset the flag to false to indicate that the animation is completed
         isPlayingAngryAnimation = false;

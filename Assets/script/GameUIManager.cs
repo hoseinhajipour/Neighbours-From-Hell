@@ -9,4 +9,9 @@ public class GameUIManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+     
+     public void LoadLevel(string name)
+     {
+         SceneManager.LoadScene(name);
+     }
 }

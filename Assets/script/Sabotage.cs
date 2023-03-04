@@ -19,6 +19,7 @@ public class Sabotage : MonoBehaviour
     public float actionDistance = 2.0f;
 
     public int angryAmount;
+    public bool BrokeableOnce = false;
 
     private void Start()
     {
@@ -30,7 +31,6 @@ public class Sabotage : MonoBehaviour
         if (other.CompareTag("Player") && !isSabotaging)
         {
             isSabotaging = true;
-//            animator.SetBool("isSabotaging", true);
         }
     }
 
@@ -79,7 +79,6 @@ public class Sabotage : MonoBehaviour
             isSabotaging = false;
             currentSabotageTime = 0f;
             sabotageSlider.value = 0f;
-            //    animator.SetBool("isSabotaging", false);
         }
     }
 
@@ -92,5 +91,10 @@ public class Sabotage : MonoBehaviour
         targetObject.SetActive(false);
         currentObject.SetActive(true);
         Broke = false;
+
+        if (BrokeableOnce)
+        {
+            gameObject.SetActive(false);
+        }
     }
 }
