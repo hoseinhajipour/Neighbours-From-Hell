@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -52,6 +53,13 @@ public class EnemyAI : MonoBehaviour
         {
             Patrol();
         }
+        
+        // Check if the target angry value has changed
+        if (currentAngryValue != targetAngryValue)
+        {
+            // Start a coroutine to update the slider value gradually
+            StartCoroutine(UpdateAngryValue());
+        }
     }
 
     void Patrol()
@@ -62,11 +70,12 @@ public class EnemyAI : MonoBehaviour
             Waypoint currentWaypoint = patrolWaypoints[currentWaypointIndex];
             agent.SetDestination(currentWaypoint.transform.position);
 
-            if (agent.remainingDistance <= 1.0f)
+            float dist = Vector3.Distance(currentWaypoint.transform.position, transform.position);
+            if (dist <= 1.5f)
             {
-                animator.SetBool("isWalking", false);
                 if (!isPlayingIdleAnimation)
                 {
+                    animator.SetBool("isWalking", false);
                     StartCoroutine(PlayIdleAnimation());
                 }
             }
@@ -82,6 +91,9 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator PlayIdleAnimation()
     {
+        transform.rotation =
+            Quaternion.Euler(0f, patrolWaypoints[currentWaypointIndex].transform.rotation.eulerAngles.y, 0f);
+        transform.position = patrolWaypoints[currentWaypointIndex].transform.position;
         // Set the flag to true to indicate that the animation is playing
         isPlayingIdleAnimation = true;
         agent.isStopped = true;
@@ -167,7 +179,9 @@ public class EnemyAI : MonoBehaviour
         if (FindSabotage)
         {
             agent.SetDestination(SabotageObject.transform.position);
-            if (agent.remainingDistance <= stoppingDistance)
+            float dist = Vector3.Distance(SabotageObject.transform.position, transform.position);
+            //  if (agent.remainingDistance <= stoppingDistance)
+            if (dist <= 1.5f)
             {
                 animator.SetBool("isWalking", false);
                 if (!isPlayingAngryAnimation)
@@ -186,41 +200,79 @@ public class EnemyAI : MonoBehaviour
         {
             Vector3 direction = player.position - transform.position;
             float angle = Vector3.Angle(direction, transform.forward);
-       //     if (angle < totalFOV) {
-                RaycastHit hito;
-                if (Physics.Raycast(transform.position, direction, out hito, lookRadius))
+            //     if (angle < totalFOV) {
+            RaycastHit hito;
+            if (Physics.Raycast(transform.position, direction, out hito, lookRadius))
+            {
+                //  Debug.Log( hit.collider.gameObject.name);
+                if (hito.collider.tag == "Sabotage")
                 {
-                    //  Debug.Log( hit.collider.gameObject.name);
-                    if (hito.collider.tag == "Sabotage")
+                    Sabotage sabotage = hito.collider.GetComponent<Sabotage>();
+                    if (sabotage.Broke == true)
                     {
-                        Sabotage sabotage = hito.collider.GetComponent<Sabotage>();
-                        if (sabotage.Broke == true)
-                        {
-                            Debug.Log("FindSabotage");
-                            FindSabotage = true;
-                            SabotageObject = hito.collider.gameObject;
-                        }
+                        Debug.Log("FindSabotage");
+                        FindSabotage = true;
+                        SabotageObject = hito.collider.gameObject;
                     }
                 }
-          //  }
+            }
+            //  }
         }
     }
+    public Slider angrySlider;
+    public int currentAngryValue = 0;
+    public int targetAngryValue = 0;
+    private float animationDuration = 2.0f;
+    IEnumerator UpdateAngryValue()
+    {
+        float timeElapsed = 0;
+        float startValue = currentAngryValue;
+        float endValue = targetAngryValue;
+        while (timeElapsed < animationDuration)
+        {
+            // Calculate the interpolation factor
+            float t = timeElapsed / animationDuration;
 
+            // Update the slider value using a smoothed Lerp function
+            float value = Mathf.SmoothStep(startValue, endValue, t);
+            angrySlider.value = value;
+
+            // Wait for the next frame
+            yield return null;
+
+            // Update the time elapsed
+            timeElapsed += Time.deltaTime;
+        }
+
+        // Set the current angry value to the target value
+        currentAngryValue = targetAngryValue;
+    }
+    public void IncreaseAngryValue(int amount)
+    {
+        targetAngryValue += amount;
+    }
+
+    public void DecreaseAngryValue(int amount)
+    {
+        targetAngryValue -= amount;
+    }
     IEnumerator PlayAnfryAnimation()
     {
         agent.isStopped = true;
         animator.Play("angry");
+        angry += 10;
+        IncreaseAngryValue(SabotageObject.GetComponent<Sabotage>().angryAmount);
         yield return new WaitForSeconds(3.0f);
-        animator.SetBool("isFix",true);
+        animator.SetBool("isFix", true);
         yield return new WaitForSeconds(5.0f);
-        animator.SetBool("isFix",false);
+        animator.SetBool("isFix", false);
         animator.SetBool("isWalking", true);
         agent.isStopped = false;
 
         SabotageObject.GetComponent<Sabotage>().fix();
         FindSabotage = false;
         SabotageObject = null;
-        angry += 10;
+      
         yield return new WaitForSeconds(1.0f);
         // Reset the flag to false to indicate that the animation is completed
         isPlayingAngryAnimation = false;

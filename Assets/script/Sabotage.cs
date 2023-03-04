@@ -18,6 +18,8 @@ public class Sabotage : MonoBehaviour
 
     public float actionDistance = 2.0f;
 
+    public int angryAmount;
+
     private void Start()
     {
         animator = GameObject.FindWithTag("Player").GetComponent<PlayerController>().animator;
